@@ -3,6 +3,6 @@
 
 int main(int argc, char** argv)
 {
-    printf("Hello World\n");
+    printf("Streams Server\n");
     return 0;
 }
