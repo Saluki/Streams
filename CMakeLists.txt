@@ -4,4 +4,4 @@ project(Streams)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 set(SOURCE_FILES main.c)
-add_executable(Streams ${SOURCE_FILES})
+add_executable(Streams ${SOURCE_FILES} server.h server.c constants.h log.h log.c)
