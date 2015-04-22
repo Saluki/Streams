@@ -13,4 +13,6 @@
 #define STDOUT 1
 #define STDERR 2
 
+#define MAX_ARRAY_SIZE 1024
+
 #endif //STREAMS_BASE_H

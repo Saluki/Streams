@@ -14,9 +14,10 @@
 #define LOG_INFO 6
 #define LOG_DEBUG 7
 
-#define LOG_FOLDER logs;
+// MUST FINISH WITH /
+#define LOG_FOLDER "/home/corentin/streams/"
 #define DISPLAY_LEVEL LOG_INFO
 
-int log(char* message, int log_level);
+int log_message(char* message, int log_level);
 
 #endif //STREAMS_LOG_H

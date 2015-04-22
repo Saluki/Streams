@@ -7,7 +7,7 @@
 
 int main(int argc, char** argv)
 {
-    int server_fd, port_number;
+    /*int server_fd, port_number;
     char *end_ptr;
 
     if(argc!=2)
@@ -26,6 +26,12 @@ int main(int argc, char** argv)
 
     server_fd = create_server(*(argv+1), 1);
     log("Streams server created", LOG_INFO);
+
+    return 0;*/
+
+    log_message("Server started", LOG_INFO);
+
+    printf("Here we are\n");
 
     return 0;
 }
