@@ -3,12 +3,14 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <string.h>
+#include <signal.h>
 
 #include "log.h"
 #include "lock.h"
 #include "constants.h"
 #include "server.h"
 
+void sig_handler(int signal_number);
 void check_incorrect_usage(int argc, char** argv);
 int extract_port_number(char** argv);
 
@@ -26,22 +28,45 @@ int main(int argc, char** argv)
 
     log_message("Streams server created", LOG_INFO);
 
-    while(TRUE) {
-
-        if ((client_fd = accept(server_fd, NULL, 0)) != -1) {
-
-            log_message("Connected with client", LOG_INFO);
-
-            // Client is now connected
-
-            shutdown(client_fd, 2);
-            close(client_fd);
-        }
+    if( signal(SIGINT, sig_handler)==-1 ||  signal(SIGTERM, sig_handler)==-1 )
+    {
+        log_message("Cannot listen to SIGINT/SIGTERM signal", LOG_CRITICAL);
+        exit(EXIT_FAILURE);
     }
 
-    remove_lock();
+    // Process request loop
+    // TODO Essayer de gerer comme pipe
+    while(TRUE) {
+
+        if ((client_fd = accept(server_fd, NULL, 0)) == -1) {
+            log_message("Could not open accept client", LOG_ALERT);
+            break;
+        }
+
+        char connect_message[MAX_ARRAY_SIZE];
+        sprintf(connect_message, "Connected with client %d", client_fd);
+        log_message(connect_message, LOG_INFO);
+
+        char msg_client[] = "Hello World\n";
+        write(client_fd, msg_client, strlen(msg_client));
+
+        sleep(10);
+
+        shutdown(client_fd, 2);
+        close(client_fd);
+    }
 
     return 0;
+}
+
+void sig_handler(int signal_number)
+{
+    if(signal_number == SIGINT || signal_number == SIGTERM)
+    {
+        remove_lock();
+        log_message("Shutting down streams server", LOG_INFO);
+        exit(EXIT_SUCCESS);
+    }
 }
 
 void check_incorrect_usage(int argc, char** argv)

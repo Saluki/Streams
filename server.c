@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "log.h"
 #include "server.h"
 
 int create_server(int port_number, int max_connections)
@@ -18,7 +19,7 @@ int create_server(int port_number, int max_connections)
 
     if( (server_fd=socket(PF_INET, SOCK_STREAM, 0)) == -1 )
     {
-        fprintf(stderr, "Could not create server\n");
+        log_message("Could not create server", LOG_CRITICAL);
         exit(EXIT_FAILURE);
     }
 
@@ -35,6 +36,7 @@ int create_server(int port_number, int max_connections)
 
     if( bind_result == -1 )
     {
+        log_message("Could not bind server address", LOG_CRITICAL);
         exit(EXIT_FAILURE);
     }
 
@@ -45,6 +47,7 @@ int create_server(int port_number, int max_connections)
 
     if( listen_result == -1 )
     {
+        log_message("Could not listen on specified port", LOG_CRITICAL);
         exit(EXIT_FAILURE);
     }
 

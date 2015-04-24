@@ -48,8 +48,14 @@ int log_message(char* message, int log_level)
     }
     else
     {
-        printf("[LOG #%d %d/%d/%d %d:%d:%d] %s\n", log_level, time_info->tm_mday + 1, time_info->tm_mon + 1,
-               time_info->tm_year + 1900, time_info->tm_hour, time_info->tm_min, time_info->tm_sec, message);
+        if(log_level<=LOG_WARNING) {
+            fprintf(stderr, "[LOG #%d %d/%d/%d %d:%d:%d] %s\n", log_level, time_info->tm_mday + 1, time_info->tm_mon + 1,
+                   time_info->tm_year + 1900, time_info->tm_hour, time_info->tm_min, time_info->tm_sec, message);
+        }
+        else {
+            printf("[LOG #%d %d/%d/%d %d:%d:%d] %s\n", log_level, time_info->tm_mday + 1, time_info->tm_mon + 1,
+                   time_info->tm_year + 1900, time_info->tm_hour, time_info->tm_min, time_info->tm_sec, message);
+        }
     }
 
     return 0;
