@@ -9,10 +9,6 @@
 #define FALSE 0
 #define NUMERICAL_BASE 10
 
-#define STDIN 0
-#define STDOUT 1
-#define STDERR 2
-
 #define MAX_ARRAY_SIZE 1024
 
 #endif //STREAMS_BASE_H
