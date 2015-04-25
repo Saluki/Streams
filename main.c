@@ -9,6 +9,7 @@
 #include "lock.h"
 #include "constants.h"
 #include "server.h"
+#include "game.h"
 
 void sig_handler(int signal_number);
 void check_incorrect_usage(int argc, char** argv);
@@ -20,12 +21,10 @@ int main(int argc, char** argv)
 
     check_incorrect_usage(argc, argv);
     set_log_method(argv);
-
     set_lock();
 
     port_number = extract_port_number(argv);
     server_fd = create_server(port_number, DEFAULT_NUMBER_USERS);
-
     log_message("Streams server created", LOG_INFO);
 
     if( signal(SIGINT, sig_handler)==-1 ||  signal(SIGTERM, sig_handler)==-1 )
@@ -34,26 +33,21 @@ int main(int argc, char** argv)
         exit(EXIT_FAILURE);
     }
 
-    // Process request loop
-    // TODO Essayer de gerer comme pipe
-    while(TRUE) {
-
-        if ((client_fd = accept(server_fd, NULL, 0)) == -1) {
+    while(TRUE)
+    {
+        if ((client_fd = accept(server_fd, NULL, 0)) == -1)
+        {
             log_message("Could not open accept client", LOG_ALERT);
-            break;
+            continue;
         }
 
-        char connect_message[MAX_ARRAY_SIZE];
-        sprintf(connect_message, "Connected with client %d", client_fd);
-        log_message(connect_message, LOG_INFO);
+        if( get_game_phase()==REGISTER_PHASE )
+        {
+            add_client(client_fd);
 
-        char msg_client[] = "Hello World\n";
-        write(client_fd, msg_client, strlen(msg_client));
-
-        sleep(10);
-
-        shutdown(client_fd, 2);
-        close(client_fd);
+            char msg_client[] = "Hello World...\nThis is a message from the Streams Server";
+            write(client_fd, msg_client, strlen(msg_client));
+        }
     }
 
     return 0;
