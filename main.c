@@ -4,13 +4,14 @@
 #include <sys/socket.h>
 #include <string.h>
 #include <signal.h>
-#include <netinet/in.h>
+#include <errno.h>
 
 #include "log.h"
 #include "lock.h"
 #include "constants.h"
 #include "server.h"
 #include "game.h"
+#include "message.h"
 
 void sig_handler(int signal_number);
 void sig_alarm_handler(int i);
@@ -19,8 +20,13 @@ int extract_port_number(char** argv);
 
 int main(int argc, char** argv)
 {
-    int server_fd, client_fd, port_number, max_fd, file_descriptors[MAX_NUMBER_USERS], i, temp_fd, nb_bytes_read;
+    int server_fd, client_fd, port_number, max_fd, file_descriptors[MAX_NUMBER_USERS], i;
+    int temp_fd, select_result, nb_bytes_read, timer_is_active=FALSE, status_code;
+
     char buffer[MAX_ARRAY_SIZE];
+    char *end_ptr, *msg_ptr;
+    char register_confirm_msg[] = "Registration complete\n";
+
     fd_set file_descriptor_set;
 
     check_incorrect_usage(argc, argv);
@@ -69,9 +75,11 @@ int main(int argc, char** argv)
             }
         }
 
-        if( select(max_fd+1, &file_descriptor_set, NULL , NULL , NULL)==-1 )
+        select_result = select(max_fd+1, &file_descriptor_set, NULL , NULL , NULL);
+
+        if( select_result<0 && errno!=EINTR )
         {
-            log_message("select() error", LOG_ALERT);
+            log_message("select() error", LOG_WARNING);
             continue;
         }
 
@@ -110,10 +118,32 @@ int main(int argc, char** argv)
                 }
                 else
                 {
-                    // PROCESSING TRANSACTION
+                    // PROCESSING REQUEST
 
-                    buffer[nb_bytes_read] = '\0';
-                    send(temp_fd, buffer, strlen(buffer), 0);
+                    if( get_game_phase() == REGISTER_PHASE )
+                    {
+                        status_code =  strtol(buffer, &end_ptr, NUMERICAL_BASE);
+
+                        if( status_code == 1 )
+                        {
+                            if(!timer_is_active)
+                            {
+                                log_message("Starting register timer", LOG_DEBUG);
+                                alarm(WAIT_TIME);
+                                timer_is_active = TRUE;
+                            }
+
+                            log_message("User asks for registration. Adding user in memory.", LOG_INFO);
+
+                            msg_ptr = (char*) encode(VALID_REGISTRATION, TRUE);
+                            send(temp_fd, msg_ptr, strlen(msg_ptr), 0);
+                        }
+                    }
+                    else
+                    {
+                        // GAME PHASE
+                        log_message("Game phase. Not yet implemented.", LOG_INFO);
+                    }
                 }
             }
         }
@@ -124,9 +154,6 @@ int main(int argc, char** argv)
 
 void sig_handler(int signal_number)
 {
-    // TODO Clean IPC's
-    // TODO Use sigaction() ?
-
     if(signal_number == SIGINT || signal_number == SIGTERM)
     {
         remove_lock();
@@ -137,7 +164,8 @@ void sig_handler(int signal_number)
 
 void sig_alarm_handler(int i)
 {
-    log_message("Alarm was fired", LOG_DEBUG);
+    set_game_phase(GAME_PHASE);
+    log_message("Timer finished", LOG_DEBUG);
 }
 
 void check_incorrect_usage(int argc, char** argv)

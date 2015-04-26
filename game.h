@@ -8,6 +8,9 @@
 #define REGISTER_PHASE 0
 #define GAME_PHASE 1
 
+#define WAIT_TIME 10
+
 int get_game_phase();
+void set_game_phase(int phase);
 
 #endif //STREAMS_GAME_H
