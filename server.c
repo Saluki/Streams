@@ -8,11 +8,7 @@
 
 #include "log.h"
 #include "server.h"
-
-struct client_node *client_chain_begin=NULL, *client_chain_end=NULL;
-
-/*shutdown(client_fd, 2);
-close(client_fd);*/
+#include "constants.h"
 
 int create_server(int port_number, int max_connections)
 {
@@ -59,50 +55,10 @@ int create_server(int port_number, int max_connections)
     return server_fd;
 }
 
-int add_client(int client_fd)
+void log_client_connection(int socket_fd)
 {
-    struct client_node *node;
-    if( (node=(struct client_node*)malloc(sizeof(struct client_node))) == -1 )
-    {
-        log_message("Could not allow memory for client node", LOG_WARNING);
-        return -1;
-    }
+    char message[MAX_ARRAY_SIZE];
+    sprintf(message, "New connection with socket file descriptor #%d" ,socket_fd);
 
-    log_message("Client structure created. Adding to list.", LOG_DEBUG);
-
-    node->client_fd = client_fd;
-    node->next = NULL;
-
-    if( client_chain_begin==NULL && client_chain_end==NULL )
-    {
-        client_chain_begin = node;
-    }
-    else
-    {
-        client_chain_end->next = node;
-    }
-    client_chain_end = node;
-
-    log_message("Client added to list", LOG_DEBUG);
-
-    return 0;
-}
-
-void display_clients()
-{
-    struct client_node *ptr = client_chain_begin;
-
-    if( client_chain_begin==NULL && client_chain_end==NULL )
-    {
-        log_message("No clients in structure", LOG_DEBUG);
-        return;
-    }
-
-    while(ptr!=NULL)
-    {
-        printf("--> client");
-        ptr = ptr->next;
-    }
-
-    printf("\n");
+    log_message(message, LOG_INFO);
 }

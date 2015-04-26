@@ -4,6 +4,7 @@
 #include <sys/socket.h>
 #include <string.h>
 #include <signal.h>
+#include <netinet/in.h>
 
 #include "log.h"
 #include "lock.h"
@@ -18,14 +19,16 @@ int extract_port_number(char** argv);
 
 int main(int argc, char** argv)
 {
-    int server_fd, client_fd, port_number;
+    int server_fd, client_fd, port_number, max_fd, file_descriptors[MAX_NUMBER_USERS], i, temp_fd, nb_bytes_read;
+    char buffer[MAX_ARRAY_SIZE];
+    fd_set file_descriptor_set;
 
     check_incorrect_usage(argc, argv);
     set_log_method(argv);
     set_lock();
 
     port_number = extract_port_number(argv);
-    server_fd = create_server(port_number, DEFAULT_NUMBER_USERS);
+    server_fd = create_server(port_number, MAX_NUMBER_USERS);
     log_message("Streams server created", LOG_INFO);
 
     if( signal(SIGINT, sig_handler)==-1 ||  signal(SIGTERM, sig_handler)==-1 )
@@ -40,24 +43,79 @@ int main(int argc, char** argv)
         exit(EXIT_FAILURE);
     }
 
-    alarm(10);
-
-    // TODO Set up select() to watch closed connections
+    for (i=0; i<MAX_NUMBER_USERS; i++)
+    {
+        file_descriptors[i] = 0;
+    }
 
     while(TRUE)
     {
-        if ((client_fd = accept(server_fd, NULL, 0)) == -1)
+        FD_ZERO(&file_descriptor_set);
+        FD_SET(server_fd, &file_descriptor_set);
+        max_fd = server_fd;
+
+        for(i=0; i<MAX_NUMBER_USERS; i++)
         {
-            log_message("Could not open accept client", LOG_ALERT);
+            temp_fd = file_descriptors[i];
+
+            if(temp_fd>0)
+            {
+                FD_SET(temp_fd, &file_descriptor_set);
+            }
+
+            if(temp_fd>max_fd)
+            {
+                max_fd = temp_fd;
+            }
+        }
+
+        if( select(max_fd+1, &file_descriptor_set, NULL , NULL , NULL)==-1 )
+        {
+            log_message("select() error", LOG_ALERT);
             continue;
         }
 
-        if( get_game_phase()==REGISTER_PHASE )
+        if( FD_ISSET(server_fd, &file_descriptor_set) )
         {
-            add_client(client_fd);
+            if( (temp_fd=accept(server_fd, NULL, 0)) < 0 )
+            {
+                log_message("Could not accept incoming connection", LOG_ALERT);
+                exit(EXIT_FAILURE);
+            }
 
-            char msg_client[] = "Hello World...\nThis is a message from the Streams Server";
-            write(client_fd, msg_client, strlen(msg_client));
+            log_client_connection(temp_fd);
+
+            for(i=0; i<MAX_NUMBER_USERS; i++)
+            {
+                if( file_descriptors[i] != 0 )
+                    continue;
+
+                file_descriptors[i] = temp_fd;
+                break;
+            }
+        }
+
+        for(i=0; i<MAX_NUMBER_USERS; i++)
+        {
+            temp_fd = file_descriptors[i];
+
+            if( FD_ISSET(temp_fd, &file_descriptor_set) )
+            {
+                if ((nb_bytes_read = read(temp_fd, buffer, MAX_ARRAY_SIZE)) == 0)
+                {
+                    log_message("Client disconnected", LOG_INFO);
+
+                    close(temp_fd);
+                    file_descriptors[i] = 0;
+                }
+                else
+                {
+                    // PROCESSING TRANSACTION
+
+                    buffer[nb_bytes_read] = '\0';
+                    send(temp_fd, buffer, strlen(buffer), 0);
+                }
+            }
         }
     }
 
