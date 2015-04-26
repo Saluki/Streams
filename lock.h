@@ -1,7 +1,10 @@
-//
-// Created by corentin on 24/04/15.
-//
-
+/**
+ * Corentin Badot-Bertrand cbadot-14
+ * Corentin Dandoy cdandoy14
+ *
+ * Serveur STREAMS
+ * Fichier header de lock.h
+ */
 #ifndef STREAMS_LOCK_H
 #define STREAMS_LOCK_H
 

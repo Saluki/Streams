@@ -1,7 +1,10 @@
-//
-// Created by corentin on 25/04/15.
-//
-
+/**
+ * Corentin Badot-Bertrand cbadot-14
+ * Corentin Dandoy cdandoy14
+ *
+ * Serveur STREAMS
+ * Code permettant de manipuler l'etat de la partie en cours
+ */
 #include "game.h"
 
 int game_phase = REGISTER_PHASE;

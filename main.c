@@ -1,3 +1,10 @@
+/**
+ * Corentin Badot-Bertrand cbadot-14
+ * Corentin Dandoy cdandoy14
+ *
+ * Serveur STREAMS
+ * Point d'entrée de l'application et boucle principale du serveur
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -134,8 +141,8 @@ int main(int argc, char** argv)
                             }
 
                             log_message("User asks for registration. Adding user in memory.", LOG_INFO);
+                            msg_ptr = (char*) encode(VALID_REGISTRATION, "1");
 
-                            msg_ptr = (char*) encode(VALID_REGISTRATION, TRUE);
                             send(temp_fd, msg_ptr, strlen(msg_ptr), 0);
                         }
                     }

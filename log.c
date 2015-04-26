@@ -1,6 +1,10 @@
-//
-// Created by corentin on 20/04/15.
-//
+/**
+ * Corentin Badot-Bertrand cbadot-14
+ * Corentin Dandoy cdandoy14
+ *
+ * Serveur STREAMS
+ * Outil permettant à l'application de logger des messages avec précision.
+ */
 #include <sys/stat.h>
 #include <time.h>
 #include <stdio.h>

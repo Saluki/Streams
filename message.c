@@ -1,7 +1,10 @@
-//
-// Created by coco on 26/04/15.
-//
-
+/**
+ * Corentin Badot-Bertrand cbadot-14
+ * Corentin Dandoy cdandoy14
+ *
+ * Serveur STREAMS
+ * Fonctions permettant d'encoder et de decoder des messages pour le client
+ */
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -11,15 +14,14 @@
 char* encode(enum message_type_t type, void* payload)
 {
     char *message;
-
     if( (message=(char*)malloc(MESSAGE_LENGTH * sizeof(char))) == NULL )
+    {
         log_message("Could not allocate memory for encode()", LOG_CRITICAL);
         exit(EXIT_FAILURE);
     }
 
     message[0] = (char) type;
-
-    strncpy(message+1, payload, MESSAGE_LENGTH-1 * sizeof(char));
+    strncpy((message+1), payload, (MESSAGE_LENGTH-1)*sizeof(char));
 
     return message;
 }

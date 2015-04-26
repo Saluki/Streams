@@ -1,7 +1,10 @@
-//
-// Created by corentin on 20/04/15.
-//
-
+/**
+ * Corentin Badot-Bertrand cbadot-14
+ * Corentin Dandoy cdandoy14
+ *
+ * Serveur STREAMS
+ * Utilitaire permettant de créer le serveur et de le faire ecouter sur un port
+ */
 #include <netinet/in.h>
 #include <stdlib.h>
 #include <stdio.h>

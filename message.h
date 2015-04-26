@@ -1,7 +1,10 @@
-//
-// Created by coco on 26/04/15.
-//
-
+/**
+ * Corentin Badot-Bertrand cbadot-14
+ * Corentin Dandoy cdandoy14
+ *
+ * Serveur STREAMS
+ * Fichier header de message.c
+ */
 #ifndef STREAMS_MESSAGE_H
 #define STREAMS_MESSAGE_H
 
