@@ -12,6 +12,7 @@
 #include "game.h"
 
 void sig_handler(int signal_number);
+void sig_alarm_handler(int i);
 void check_incorrect_usage(int argc, char** argv);
 int extract_port_number(char** argv);
 
@@ -32,6 +33,16 @@ int main(int argc, char** argv)
         log_message("Cannot listen to SIGINT/SIGTERM signal", LOG_CRITICAL);
         exit(EXIT_FAILURE);
     }
+
+    if( signal(SIGALRM, sig_alarm_handler)==-1 )
+    {
+        log_message("Cannot listen to SIGALRM signal", LOG_CRITICAL);
+        exit(EXIT_FAILURE);
+    }
+
+    alarm(10);
+
+    // TODO Set up select() to watch closed connections
 
     while(TRUE)
     {
@@ -55,12 +66,20 @@ int main(int argc, char** argv)
 
 void sig_handler(int signal_number)
 {
+    // TODO Clean IPC's
+    // TODO Use sigaction() ?
+
     if(signal_number == SIGINT || signal_number == SIGTERM)
     {
         remove_lock();
         log_message("Shutting down streams server", LOG_INFO);
         exit(EXIT_SUCCESS);
     }
+}
+
+void sig_alarm_handler(int i)
+{
+    log_message("Alarm was fired", LOG_DEBUG);
 }
 
 void check_incorrect_usage(int argc, char** argv)
