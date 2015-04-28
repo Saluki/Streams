@@ -24,7 +24,7 @@ int main(int argc, char** argv)
     int temp_fd, select_result, nb_bytes_read, timer_is_active=FALSE, status_code;
 
     char buffer[MAX_ARRAY_SIZE];
-    char *end_ptr, *msg_ptr;
+    char *end_ptr, *validation;
     char register_confirm_msg[] = "Registration complete\n";
 
     fd_set file_descriptor_set;
@@ -109,7 +109,14 @@ int main(int argc, char** argv)
 
             if( FD_ISSET(temp_fd, &file_descriptor_set) )
             {
-                if ((nb_bytes_read = read(temp_fd, buffer, MAX_ARRAY_SIZE)) == 0)
+                char *message;
+
+                if ( (message = (char*) malloc(MESSAGE_LENGTH*sizeof(char))) == NULL) {
+                    perror("malloc()");
+                    exit(EXIT_FAILURE);
+                }
+
+                if ((nb_bytes_read = recv(temp_fd, message, MESSAGE_LENGTH*sizeof(char), 0)) == 0)
                 {
                     log_message("Client disconnected", LOG_INFO);
 
@@ -122,7 +129,8 @@ int main(int argc, char** argv)
 
                     if( get_game_phase() == REGISTER_PHASE )
                     {
-                        status_code =  strtol(buffer, &end_ptr, NUMERICAL_BASE);
+                        struct message_t mess = decode(message);
+                        status_code = mess.type;
 
                         if( status_code == 1 )
                         {
@@ -133,11 +141,20 @@ int main(int argc, char** argv)
                                 timer_is_active = TRUE;
                             }
 
-                            log_message("User asks for registration. Adding user in memory.", LOG_INFO);
+                            char *new_user = (char*) malloc(MAX_ARRAY_SIZE* sizeof(char));
+                            sprintf(new_user, "User '%s' asks for registration. Adding user in memory.", mess.payload);
+                            log_message(new_user, LOG_INFO);
 
-                            msg_ptr = (char*) encode(VALID_REGISTRATION, TRUE);
-                            send(temp_fd, msg_ptr, strlen(msg_ptr), 0);
-                        }
+                            //printf("[%d] %s\n", strlen(mess.payload), mess.payload);
+
+                            if ( (validation = (char*) malloc(MESSAGE_LENGTH*sizeof(char))) == NULL) {
+                                perror("malloc()");
+                                exit(EXIT_FAILURE);
+                            }
+
+                            validation = encode(VALID_REGISTRATION, "1");
+                            send(temp_fd, validation, MESSAGE_LENGTH*sizeof(char), 0);
+                        };
                     }
                     else
                     {
