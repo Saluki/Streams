@@ -9,7 +9,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/socket.h>
-#include <string.h>
 #include <signal.h>
 #include <errno.h>
 
@@ -28,8 +27,8 @@ int extract_port_number(char** argv);
 
 int main(int argc, char** argv)
 {
-    int server_fd, client_fd, port_number, max_fd, file_descriptors[MAX_NUMBER_USERS], i;
-    int temp_fd, select_result, nb_bytes_read, timer_is_active=FALSE, status_code;
+    int server_fd, port_number, max_fd, file_descriptors[MAX_NUMBER_USERS], i;
+    int temp_fd, select_result, timer_is_active=FALSE, status_code;
 
     char *validation;
 
@@ -113,7 +112,7 @@ int main(int argc, char** argv)
                     exit(EXIT_FAILURE);
                 }
 
-                if ((nb_bytes_read = recv(temp_fd, message, MESSAGE_LENGTH*sizeof(char), 0)) == 0)
+                if ((recv(temp_fd, message, MESSAGE_LENGTH*sizeof(char), 0)) == 0)
                 {
                     log_message("Client disconnected", LOG_INFO);
 
@@ -141,11 +140,6 @@ int main(int argc, char** argv)
                             char *new_user = (char*) malloc(MAX_ARRAY_SIZE* sizeof(char));
                             sprintf(new_user, "User '%s' asks for registration. Adding user in memory.", (char*)mess.payload);
                             log_message(new_user, LOG_INFO);
-
-                            if ( (validation = (char*) malloc(MESSAGE_LENGTH*sizeof(char))) == NULL) {
-                                perror("malloc()");
-                                exit(EXIT_FAILURE);
-                            }
 
                             validation = encode(VALID_REGISTRATION, "1");
                             send(temp_fd, validation, MESSAGE_LENGTH*sizeof(char), 0);
@@ -209,7 +203,7 @@ int extract_port_number(char** argv)
     int port_number;
     char *end_ptr;
 
-    port_number = strtol(*(argv+1), &end_ptr, NUMERICAL_BASE);
+    port_number = (int) strtol(*(argv+1), &end_ptr, NUMERICAL_BASE);
 
     if(*end_ptr!='\0' || port_number<=0)
     {

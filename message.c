@@ -32,9 +32,11 @@ struct message_t decode(char* message) {
     char *payload;
 
     switch (type) {
+
         case CANCEL_GAME:
             log_message("Cancelling game", LOG_INFO);
             break;
+
         case REGISTRATE:
             log_message("New client", LOG_INFO);
 
@@ -50,8 +52,8 @@ struct message_t decode(char* message) {
             }
 
             strncpy(payload, message+1, name_length);
-
             break;
+
         case VALID_REGISTRATION:
             log_message("Valid registration", LOG_INFO);
             if ( (payload = malloc(1 * sizeof(char))) == NULL) {
@@ -60,15 +62,19 @@ struct message_t decode(char* message) {
             }
             strncpy(payload, message+1, 1);
             break;
+
         case NEW_PICK:
             log_message("New pick", LOG_INFO);
             break;
+
         case CHOOSE_PICK:
             log_message("Position chosen", LOG_INFO);
             break;
+
         case END_GAME:
             log_message("End of game", LOG_INFO);
             break;
+
         default:
             log_message("Bad message type", LOG_NOTICE);
             break;
