@@ -22,10 +22,10 @@
 #define WRITE_OUT 0
 #define WRITE_FILE 1
 
-// Log path. Must end with a slash
-#define LOG_FOLDER "/home/corentin/streams/"
+#define LOG_FOLDER "streams_logs"
 
 int log_message(char* message, int log_level);
+int log_error(char* message, int log_level, int errno_number);
 void set_log_method(char** argv);
 
 #endif //STREAMS_LOG_H

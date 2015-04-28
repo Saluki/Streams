@@ -8,6 +8,7 @@
 #include <netinet/in.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <errno.h>
 
 #include "log.h"
 #include "server.h"
@@ -23,7 +24,7 @@ int create_server(int port_number, int max_connections)
 
     if( (server_fd=socket(PF_INET, SOCK_STREAM, 0)) == -1 )
     {
-        log_message("Could not create server", LOG_CRITICAL);
+        log_error("Could not create server", LOG_CRITICAL, errno);
         exit(EXIT_FAILURE);
     }
 
@@ -36,22 +37,18 @@ int create_server(int port_number, int max_connections)
     socket_details.sin_port = htons(port_number);
     socket_details.sin_addr.s_addr = htonl(INADDR_ANY);
 
-    bind_result = bind(server_fd, (struct sockaddr *) &socket_details, sizeof(struct sockaddr_in));
-
-    if( bind_result == -1 )
+    if( bind(server_fd, (struct sockaddr *) &socket_details, sizeof(struct sockaddr_in)) == -1 )
     {
-        log_message("Could not bind server address", LOG_CRITICAL);
+        log_error("Could not bind server address", LOG_CRITICAL, errno);
         exit(EXIT_FAILURE);
     }
 
     // ETAPE 3 "listen"
     // Ecoute sur le ports
 
-    listen_result = listen(server_fd, 0);
-
-    if( listen_result == -1 )
+    if( listen(server_fd, 0) == -1 )
     {
-        log_message("Could not listen on specified port", LOG_CRITICAL);
+        log_error("Could not listen on specified port", LOG_CRITICAL, errno);
         exit(EXIT_FAILURE);
     }
 

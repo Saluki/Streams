@@ -20,6 +20,7 @@
 #include "game.h"
 #include "message.h"
 
+void register_signal_handlers();
 void sig_handler(int signal_number);
 void sig_alarm_handler(int i);
 void check_incorrect_usage(int argc, char** argv);
@@ -30,9 +31,7 @@ int main(int argc, char** argv)
     int server_fd, client_fd, port_number, max_fd, file_descriptors[MAX_NUMBER_USERS], i;
     int temp_fd, select_result, nb_bytes_read, timer_is_active=FALSE, status_code;
 
-    char buffer[MAX_ARRAY_SIZE];
-    char *end_ptr, *validation;
-    char register_confirm_msg[] = "Registration complete\n";
+    char *validation;
 
     fd_set file_descriptor_set;
 
@@ -44,17 +43,7 @@ int main(int argc, char** argv)
     server_fd = create_server(port_number, MAX_NUMBER_USERS);
     log_message("Streams server created", LOG_INFO);
 
-    if( signal(SIGINT, sig_handler)==-1 ||  signal(SIGTERM, sig_handler)==-1 )
-    {
-        log_message("Cannot listen to SIGINT/SIGTERM signal", LOG_CRITICAL);
-        exit(EXIT_FAILURE);
-    }
-
-    if( signal(SIGALRM, sig_alarm_handler)==-1 )
-    {
-        log_message("Cannot listen to SIGALRM signal", LOG_CRITICAL);
-        exit(EXIT_FAILURE);
-    }
+    register_signal_handlers();
 
     for (i=0; i<MAX_NUMBER_USERS; i++)
     {
@@ -86,7 +75,7 @@ int main(int argc, char** argv)
 
         if( select_result<0 && errno!=EINTR )
         {
-            log_message("select() error", LOG_WARNING);
+            log_error("Select call error", LOG_WARNING, errno);
             continue;
         }
 
@@ -94,7 +83,7 @@ int main(int argc, char** argv)
         {
             if( (temp_fd=accept(server_fd, NULL, 0)) < 0 )
             {
-                log_message("Could not accept incoming connection", LOG_ALERT);
+                log_error("Could not accept incoming connection", LOG_ALERT, errno);
                 exit(EXIT_FAILURE);
             }
 
@@ -118,8 +107,9 @@ int main(int argc, char** argv)
             {
                 char *message;
 
-                if ( (message = (char*) malloc(MESSAGE_LENGTH*sizeof(char))) == NULL) {
-                    perror("malloc()");
+                if ( (message = (char*) malloc(MESSAGE_LENGTH*sizeof(char))) == NULL)
+                {
+                    log_error("Memory allocation error", LOG_ALERT, errno);
                     exit(EXIT_FAILURE);
                 }
 
@@ -149,10 +139,8 @@ int main(int argc, char** argv)
                             }
 
                             char *new_user = (char*) malloc(MAX_ARRAY_SIZE* sizeof(char));
-                            sprintf(new_user, "User '%s' asks for registration. Adding user in memory.", mess.payload);
+                            sprintf(new_user, "User '%s' asks for registration. Adding user in memory.", (char*)mess.payload);
                             log_message(new_user, LOG_INFO);
-
-                            //printf("[%d] %s\n", strlen(mess.payload), mess.payload);
 
                             if ( (validation = (char*) malloc(MESSAGE_LENGTH*sizeof(char))) == NULL) {
                                 perror("malloc()");
@@ -174,6 +162,21 @@ int main(int argc, char** argv)
     }
 
     return 0;
+}
+
+void register_signal_handlers()
+{
+    if( signal(SIGINT, sig_handler)==SIG_ERR ||  signal(SIGTERM, sig_handler)==SIG_ERR )
+    {
+        log_error("Cannot listen to SIGINT/SIGTERM signal", LOG_CRITICAL, errno);
+        exit(EXIT_FAILURE);
+    }
+
+    if( signal(SIGALRM, sig_alarm_handler)==SIG_ERR )
+    {
+        log_error("Cannot listen to SIGALRM signal", LOG_CRITICAL, errno);
+        exit(EXIT_FAILURE);
+    }
 }
 
 void sig_handler(int signal_number)
