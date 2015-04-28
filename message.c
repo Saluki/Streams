@@ -1,10 +1,10 @@
-/*
+/**
  * Corentin Badot-Bertrand cbadot-14
  * Corentin Dandoy cdandoy14
  *
- * Définit la méthode d'encodage et de décodage des messages
+ * Serveur STREAMS
+ * Fonctions permettant d'encoder et de decoder des messages pour le client
  */
-
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>

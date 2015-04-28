@@ -1,7 +1,10 @@
-//
-// Created by corentin on 24/04/15.
-//
-
+/**
+ * Corentin Badot-Bertrand cbadot-14
+ * Corentin Dandoy cdandoy14
+ *
+ * Serveur STREAMS
+ * Fonctions permettant d'implementer le blockage et deblockage du serveur
+ */
 #include <unistd.h>
 #include <stdio.h>
 #include <pwd.h>

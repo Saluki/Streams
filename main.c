@@ -1,3 +1,10 @@
+/**
+ * Corentin Badot-Bertrand cbadot-14
+ * Corentin Dandoy cdandoy14
+ *
+ * Serveur STREAMS
+ * Point d'entrée de l'application et boucle principale du serveur
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>

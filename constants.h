@@ -1,7 +1,10 @@
-//
-// Created by corentin on 20/04/15.
-//
-
+/**
+ * Corentin Badot-Bertrand cbadot-14
+ * Corentin Dandoy cdandoy14
+ *
+ * Serveur STREAMS
+ * Constantes utilisées dans tout le programme
+ */
 #ifndef CONSTANTS_BASE_H
 #define CONSTANTS_BASE_H
 

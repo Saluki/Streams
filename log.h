@@ -1,7 +1,10 @@
-//
-// Created by corentin on 20/04/15.
-//
-
+/**
+ * Corentin Badot-Bertrand cbadot-14
+ * Corentin Dandoy cdandoy14
+ *
+ * Serveur STREAMS
+ * Fichier header de log.c contenant les differents niveaux de log et certaines préferences.
+ */
 #ifndef STREAMS_LOG_H
 #define STREAMS_LOG_H
 
