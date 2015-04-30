@@ -20,6 +20,7 @@
 #include "game.h"
 #include "message.h"
 
+
 void register_signal_handlers();
 void sig_handler(int signal_number);
 void sig_alarm_handler(int i);
