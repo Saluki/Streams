@@ -12,6 +12,7 @@
 #include <sys/shm.h>
 #include <signal.h>
 #include <errno.h>
+#include <string.h>
 
 #include "log.h"
 #include "lock.h"
@@ -103,40 +104,47 @@ int main(int argc, char** argv)
         {
             temp_fd = file_descriptors[i];
 
-            if( FD_ISSET(temp_fd, &file_descriptor_set) )
+            if( !FD_ISSET(temp_fd, &file_descriptor_set) )
+                continue;
+
+            char *message = NULL;
+            if( (message = (char*) calloc(MESSAGE_LENGTH, sizeof(char))) == NULL)
             {
-                char *message;
+                log_error("Memory allocation error", LOG_ALERT, errno);
+                exit(EXIT_FAILURE);
+            }
 
-                if ( (message = (char*) malloc(MESSAGE_LENGTH*sizeof(char))) == NULL)
+            if( recv(temp_fd, message, MESSAGE_LENGTH, 0) == -1)   // Disconnected
+            {
+                log_message("Client disconnected", LOG_INFO);
+
+                close(temp_fd);
+                file_descriptors[i] = 0;
+            }
+            else    // Message sent to server
+            {
+                struct message_t mess = decode(message);
+                status_code = mess.type;
+
+                if( get_game_phase() == REGISTER_PHASE )
                 {
-                    log_error("Memory allocation error", LOG_ALERT, errno);
-                    exit(EXIT_FAILURE);
-                }
+                    if( status_code != 1 ) {
+                        // TODO Send message back to user?
+                        log_message("Currently register phase. User can only register", LOG_DEBUG);
+                        continue;
+                    }
 
-                if ((recv(temp_fd, message, MESSAGE_LENGTH*sizeof(char), 0)) == 0)
-                {
-                    log_message("Client disconnected", LOG_INFO);
-
-                    close(temp_fd);
-                    file_descriptors[i] = 0;
-                }
-                else
-                {
-                    // PROCESSING REQUEST
-
-                    if( get_game_phase() == REGISTER_PHASE )
+                    if(!timer_is_active)
                     {
-                        struct message_t mess = decode(message);
-                        status_code = mess.type;
+                        log_message("Starting register timer", LOG_DEBUG);
+                        alarm(WAIT_TIME);
+                        timer_is_active = TRUE;
+                    }
 
-                        if( status_code == 1 )
-                        {
-                            if(!timer_is_active)
-                            {
-                                log_message("Starting register timer", LOG_DEBUG);
-                                alarm(WAIT_TIME);
-                                timer_is_active = TRUE;
-                            }
+                    // Display log for user
+                    char *new_user = (char*) malloc(MAX_ARRAY_SIZE* sizeof(char));
+                    sprintf(new_user, "User '%s' asks for registration. Adding user in memory.", (char*)mess.payload);
+                    log_message(new_user, LOG_INFO);
 
                             char *new_user = (char*) malloc(MAX_ARRAY_SIZE* sizeof(char));
                             sprintf(new_user, "User '%s' asks for registration. Adding user in memory.", (char*)mess.payload);
@@ -173,8 +181,15 @@ int main(int argc, char** argv)
                         // GAME PHASE
                         log_message("Game phase. Not yet implemented.", LOG_INFO);
                     }
+                    validation = encode(VALID_REGISTRATION, "1");
+                    send(temp_fd, validation, strlen(validation), 0);
+                }
+                else    // GAME PHASE
+                {
+                    log_message("Game phase. Not yet implemented.", LOG_INFO);
                 }
             }
+
         }
     }
 

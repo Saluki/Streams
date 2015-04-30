@@ -8,28 +8,37 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <errno.h>
 #include "message.h"
 #include "log.h"
 
+// TODO Check if MESSAGE LENGTH must be 26 -> terminating \0
 char* encode(enum message_type_t type, void *payload)
 {
     char *message;
-
     if ( (message = malloc(MESSAGE_LENGTH * sizeof(char))) == NULL) {
         perror("malloc()");
         exit(EXIT_FAILURE);
     }
 
     sprintf(message, "%d%s\n", type, (char*) payload);
-
     return message;
 }
 
 struct message_t decode(char* message) {
 
-    struct message_t struct_message;
-    enum message_type_t type = (enum message_type_t) (message[0] - '0');
+    int name_length;
     char *payload;
+    struct message_t struct_message;
+    enum message_type_t type;
+
+    if( strlen(message)<2 ) {
+        log_message("Message length is too short", LOG_DEBUG);
+        exit(EXIT_FAILURE);
+    }
+
+    type = (enum message_type_t) (message[0] - '0');
+    message++;
 
     switch (type) {
 
@@ -38,20 +47,19 @@ struct message_t decode(char* message) {
             break;
 
         case REGISTRATE:
-            log_message("New client", LOG_INFO);
 
-            size_t name_length;
-            if ( (name_length = strlen(message)-1) < MIN_NAME_LENGTH) {
-                perror("Client name invalid");
+            // Removing \r and \n characters
+            message = strtok(message, "\r\n");
+
+            name_length = strlen(message);
+
+            if( (payload=(char*)malloc(name_length*sizeof(char))) == NULL)
+            {
+                log_error("Memory allocation error. Could not allow memory for payload", LOG_ALERT, errno);
                 exit(EXIT_FAILURE);
             }
 
-            if ( (payload = malloc(name_length * sizeof(char))) == NULL) {
-                perror("malloc()");
-                exit(EXIT_FAILURE);
-            }
-
-            strncpy(payload, message+1, name_length);
+            strncpy(payload, message, name_length+1);
             break;
 
         case VALID_REGISTRATION:
@@ -76,7 +84,7 @@ struct message_t decode(char* message) {
             break;
 
         default:
-            log_message("Bad message type", LOG_NOTICE);
+            log_message("Incorrect message format: wrong type", LOG_NOTICE);
             break;
     }
 
