@@ -95,7 +95,7 @@ int main(int argc, char **argv) {
             continue;
         }
 
-        if (get_game_phase() == REGISTER_PHASE && FD_ISSET(server_fd, &file_descriptor_set)) {
+        if (/*get_game_phase() == REGISTER_PHASE &&*/ FD_ISSET(server_fd, &file_descriptor_set)) {
 
             if ((temp_fd = accept(server_fd, NULL, 0)) < 0) {
                 log_error("Could not accept incoming connection", LOG_ALERT, errno);
@@ -137,7 +137,7 @@ int main(int argc, char **argv) {
             {
                 struct message_t mess=decode(message);
 
-                if( (status_code = mess.type) == -1) {
+                if( (status_code = mess.type) == ERROR_MESSAGE) {
                     continue;
                 }
 
@@ -163,6 +163,7 @@ int main(int argc, char **argv) {
                     semaphore_down(SEMAPHORE_ACCESS);
                     strncpy(shared_mem_ptr->players->name, (char *) mess.payload, strlen(mess.payload));
                     shared_mem_ptr->players[i].fd = temp_fd;
+                    shared_mem_ptr->players[i].score = 15; // TODO A supprimer
                     semaphore_up(SEMAPHORE_ACCESS);
 
                     validation = encode(VALID_REGISTRATION, "1");

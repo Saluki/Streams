@@ -36,7 +36,7 @@ struct message_t decode(char* message) {
     {
         log_message("Message length is too short", LOG_DEBUG);
 
-        struct_message.type = -1;
+        struct_message.type = ERROR_MESSAGE;
         struct_message.payload = NULL;
         return struct_message;
     }
@@ -89,7 +89,7 @@ struct message_t decode(char* message) {
 
         default:
 
-            type = -1;
+            type = ERROR_MESSAGE;
             log_message("Incorrect message format: wrong type", LOG_NOTICE);
             break;
     }
