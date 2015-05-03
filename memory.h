@@ -16,6 +16,7 @@ struct memory {
 
 struct player {
     char name[MAX_USERNAME_LENGTH];
+    int score;
     int fd;
 };
 

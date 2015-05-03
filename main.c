@@ -140,7 +140,6 @@ int main(int argc, char** argv) {
                         timer_is_active = TRUE;
                     }
 
-                    // Display log for user
                     char *new_user = (char *) malloc(MAX_ARRAY_SIZE * sizeof(char));
                     sprintf(new_user, "User '%s' asks for registration. Adding user in memory.", (char *) mess.payload);
                     log_message(new_user, LOG_INFO);
@@ -148,10 +147,10 @@ int main(int argc, char** argv) {
                     validation = encode(VALID_REGISTRATION, "1");
                     send(temp_fd, validation, strlen(validation), 0);
 
-                    semaphore_down();
-                    strncpy(&shared_mem_ptr->player[i].name, (char*) mess.payload, strlen(new_user));
+                    semaphore_down(access);
+                    strncpy(&shared_mem_ptr->player[i].name, (char*) mess.payload, strlen(mess.payload));
                     shared_mem_ptr->player[i].fd = temp_fd;
-                    semaphore_up();
+                    semaphore_up(access);
 
                 }
                 else    // GAME PHASE
