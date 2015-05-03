@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/socket.h>
+#include <sys/shm.h>
 #include <signal.h>
 #include <errno.h>
 #include <string.h>
@@ -148,12 +149,35 @@ int main(int argc, char** argv)
 
                     validation = encode(VALID_REGISTRATION, "1");
                     send(temp_fd, validation, strlen(validation), 0);
+
                 }
                 else    // GAME PHASE
                 {
                     log_message("Game phase. Not yet implemented.", LOG_INFO);
+
+                    // Shared memory
+
+                    int shmid;
+                    key_t key = ftok("./", 'd');
+                    size_t shared_mem_size = MAX_ARRAY_SIZE * sizeof(char); // A redéfinir
+                    void* shared_mem_ptr;
+
+                    if ( (shmid = shmget(key, shared_mem_size, 0666 | IPC_CREAT)) < 0)  {
+                        perror("shmget()");
+                        exit(EXIT_FAILURE);
+                    }
+
+                    // void* est le type de donnée en mémoire (à remplacer par struct par exemple)
+                    if ( ((void*) shared_mem_ptr = shmat(shmid, NULL, 0)) == (void*)-1) {
+                        perror("shmat()");
+                        exit(EXIT_FAILURE);
+                    }
+
+                    // Modification des valeurs en mémoire
+                    log_message("Mémoire partagée créée et utilisable.", LOG_DEBUG);
+
+                    shmdt(shared_mem_ptr); // Libère la mémoire partagée
                 }
-            }
 
         }
     }
