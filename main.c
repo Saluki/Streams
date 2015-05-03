@@ -25,15 +25,19 @@
 #include "semaphore.h"
 
 void register_signal_handlers();
-void sig_handler(int signal_number);
+
+void sig_end_handler(int signal_number);
+
 void sig_alarm_handler(int i);
-void check_incorrect_usage(int argc, char** argv);
-int extract_port_number(char** argv);
+
+void check_incorrect_usage(int argc, char **argv);
+
+int extract_port_number(char **argv);
 
 int shmid;
-struct memory* shared_mem_ptr;
+struct memory *shared_mem_ptr;
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
 
     int server_fd, port_number, max_fd, file_descriptors[MAX_NUMBER_USERS], i;
     int temp_fd, select_result, timer_is_active = FALSE, status_code;
@@ -58,8 +62,8 @@ int main(int argc, char** argv) {
 
     // -- SHARED MEMORY AND SEMAPHORES --
 
-    shmid = create_mem();
-    shared_mem_ptr = attach_mem(shmid);
+    shmid = create_shared_memory();
+    shared_mem_ptr = attach_memory(shmid);
     init_semaphores();
 
     log_message("Shared memory and semaphores created", LOG_DEBUG);
@@ -133,8 +137,7 @@ int main(int argc, char** argv) {
             {
                 struct message_t mess = decode(message);
 
-                if( (status_code=mess.type) == -1 )
-                {
+                if ((status_code = mess.type) == -1) {
                     continue;
                 }
 
@@ -157,7 +160,7 @@ int main(int argc, char** argv) {
                     log_message(new_user, LOG_INFO);
 
                     semaphore_down(SEMAPHORE_ACCESS);
-                    strncpy(shared_mem_ptr->players->name, (char*) mess.payload, strlen(mess.payload));
+                    strncpy(shared_mem_ptr->players->name, (char *) mess.payload, strlen(mess.payload));
                     shared_mem_ptr->players[i].fd = temp_fd;
                     semaphore_up(SEMAPHORE_ACCESS);
 
@@ -177,7 +180,8 @@ int main(int argc, char** argv) {
 }
 
 void register_signal_handlers() {
-    if (signal(SIGINT, sig_handler) == SIG_ERR || signal(SIGTERM, sig_handler) == SIG_ERR) {
+
+    if (signal(SIGINT, sig_end_handler) == SIG_ERR || signal(SIGTERM, sig_end_handler) == SIG_ERR) {
         log_error("Cannot listen to SIGINT/SIGTERM signal", LOG_CRITICAL, errno);
         exit(EXIT_FAILURE);
     }
@@ -188,12 +192,15 @@ void register_signal_handlers() {
     }
 }
 
-void sig_handler(int signal_number) {
+void sig_end_handler(int signal_number) {
 
     if (signal_number == SIGINT || signal_number == SIGTERM) {
 
-        shmdt(shared_mem_ptr); // Détache la mémoire partagée
-        shmctl(shmid, IPC_RMID, NULL); // Supprime la mémoire partagée
+        shmdt(shared_mem_ptr);
+        shmctl(shmid, IPC_RMID, NULL);
+        log_message("Shared memory deleted from system", LOG_DEBUG);
+
+        delete_semaphores();
 
         remove_lock();
         log_message("Shutting down streams server", LOG_INFO);
@@ -201,12 +208,14 @@ void sig_handler(int signal_number) {
     }
 }
 
-void sig_alarm_handler(int i) {
+void sig_alarm_handler(int signal_number) {
+
     set_game_phase(GAME_PHASE);
     log_message("Timer finished", LOG_DEBUG);
 }
 
 void check_incorrect_usage(int argc, char **argv) {
+
     if (argc != 3) {
         fprintf(stderr, "Incorrect usage\nUsage: %s [port-number] [out|file]\n", *argv);
         exit(EXIT_FAILURE);
@@ -214,6 +223,7 @@ void check_incorrect_usage(int argc, char **argv) {
 }
 
 int extract_port_number(char **argv) {
+
     int port_number;
     char *end_ptr;
 

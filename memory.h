@@ -5,6 +5,7 @@
  * Fonctions liées à la mémoire partagée
  */
 
+#include <sys/types.h>
 #include "constants.h"
 
 #ifndef STREAMS_MEMORY_H
@@ -20,7 +21,8 @@ struct memory {
     struct player players[MAX_NUMBER_USERS];
 };
 
-int create_mem();
-struct memory* attach_mem(int shmid);
+key_t get_shared_memory_token();
+int create_shared_memory();
+struct memory *attach_memory(int shmid);
 
 #endif //STREAMS_MEMORY_H
