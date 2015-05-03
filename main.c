@@ -22,6 +22,7 @@
 #include "game.h"
 #include "message.h"
 #include "memory.h"
+#include "semaphore.h"
 
 void register_signal_handlers();
 void sig_handler(int signal_number);
@@ -146,10 +147,10 @@ int main(int argc, char** argv) {
                     validation = encode(VALID_REGISTRATION, "1");
                     send(temp_fd, validation, strlen(validation), 0);
 
-                    semaphore_down(access);
+                    semaphore_down(SEMAPHORE_ACCESS);
                     strncpy(&shared_mem_ptr->player[i].name, (char*) mess.payload, strlen(mess.payload));
                     shared_mem_ptr->player[i].fd = temp_fd;
-                    semaphore_up(access);
+                    semaphore_up(SEMAPHORE_ACCESS);
 
                 }
                 else    // GAME PHASE
