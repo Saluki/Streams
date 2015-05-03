@@ -135,9 +135,9 @@ int main(int argc, char **argv) {
             }
             else    // Message sent to server
             {
-                struct message_t mess = decode(message);
+                struct message_t mess=decode(message);
 
-                if ((status_code = mess.type) == -1) {
+                if( (status_code = mess.type) == -1) {
                     continue;
                 }
 
@@ -159,6 +159,7 @@ int main(int argc, char **argv) {
                     sprintf(new_user, "User '%s' asks for registration. Adding user in memory.", (char *) mess.payload);
                     log_message(new_user, LOG_INFO);
 
+                    // Add a player to the shared memory
                     semaphore_down(SEMAPHORE_ACCESS);
                     strncpy(shared_mem_ptr->players->name, (char *) mess.payload, strlen(mess.payload));
                     shared_mem_ptr->players[i].fd = temp_fd;

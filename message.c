@@ -32,9 +32,13 @@ struct message_t decode(char* message) {
     struct message_t struct_message;
     enum message_type_t type;
 
-    if( strlen(message)<2 ) {
+    if( strlen(message)<2 )
+    {
         log_message("Message length is too short", LOG_DEBUG);
-        exit(EXIT_FAILURE);
+
+        struct_message.type = -1;
+        struct_message.payload = NULL;
+        return struct_message;
     }
 
     type = (enum message_type_t) (message[0] - '0');
