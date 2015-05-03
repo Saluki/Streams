@@ -2,8 +2,10 @@
  * Corentin Badot-Bertrand cbadot-14
  * Corentin Dandoy cdandoy14
  *
- * Serveur STREAMS
- * Point d'entrée de l'application et boucle principale du serveur
+ * Implémentation du serveur STREAMS
+ * Point d'entrée de l'application serveur et boucle principale du serveur.
+ *
+ * https://github.com/Saluki/Streams-Server
  */
 #include <stdio.h>
 #include <stdlib.h>

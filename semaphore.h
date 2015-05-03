@@ -1,7 +1,13 @@
-//
-// Created by corentin on 03/05/15.
-//
-
+/**
+ * Corentin Badot-Bertrand cbadot-14
+ * Corentin Dandoy cdandoy14
+ *
+ * Serveur STREAMS
+ * Fichier header contenant les définitions des fonctions de semaphore.c ainsi que des constantes
+ * permettant d'identifier les sémaphores (MUTEX et ACCESS).
+ *
+ * https://github.com/Saluki/Streams-Server
+ */
 #include <sys/types.h>
 
 #ifndef STREAMS_SEMAPHORE_H

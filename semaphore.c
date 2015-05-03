@@ -1,7 +1,12 @@
-//
-// Created by corentin on 03/05/15.
-//
-
+/**
+ * Corentin Badot-Bertrand cbadot-14
+ * Corentin Dandoy cdandoy14
+ *
+ * Serveur STREAMS
+ * Fonctions permettant de manipuler les sémaphores de la mémoire partagée.
+ *
+ * https://github.com/Saluki/Streams-Server
+ */
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/sem.h>

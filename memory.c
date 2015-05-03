@@ -1,10 +1,12 @@
-/*
- * BADOT-BERTRAND Corentin cbadot-14
- * DANDOY Corentin cdandoy14
+/**
+ * Corentin Badot-Bertrand cbadot-14
+ * Corentin Dandoy cdandoy14
  *
- * Fonctions liées à la mémoire partagée
+ * Implémentation du serveur STREAMS.
+ * Fonctions liées à la manipulation de la mémoire partagée.
+ *
+ * https://github.com/Saluki/Streams-Server
  */
-
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>

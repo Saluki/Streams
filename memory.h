@@ -1,12 +1,16 @@
-/*
- * BADOT-BERTRAND Corentin cbadot-14
- * DANDOY Corentin cdandoy14
+/**
+ * Corentin Badot-Bertrand cbadot-14
+ * Corentin Dandoy cdandoy14
  *
- * Fonctions liées à la mémoire partagée
+ * Implémentation du serveur STREAMS.
+ * Fichier contenant les définitions des fonctions de memory.c ainsi que des structures qui sont utilisées
+ * dans la mémoire partagée.
+ *
+ * https://github.com/Saluki/Streams-Server
  */
-
 #include <sys/types.h>
 #include "constants.h"
+#include "game.h"
 
 #ifndef STREAMS_MEMORY_H
 #define STREAMS_MEMORY_H

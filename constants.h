@@ -2,8 +2,10 @@
  * Corentin Badot-Bertrand cbadot-14
  * Corentin Dandoy cdandoy14
  *
- * Serveur STREAMS
- * Constantes utilisées dans tout le programme
+ * Implémentation du serveur STREAMS.
+ * Constantes utilisées dans toute l'implémentation (tailles maximales,...).
+ *
+ * https://github.com/Saluki/Streams-Server
  */
 #ifndef CONSTANTS_BASE_H
 #define CONSTANTS_BASE_H
@@ -15,7 +17,6 @@
 
 #define FTOK_SHARED_MEMORY_ID 'm'
 #define FTOK_SEMAPHORES_ID 's'
-#define MAX_NUMBER_USERS 10
 #define MAX_USERNAME_LENGTH 24
 
 #endif //STREAMS_BASE_H
