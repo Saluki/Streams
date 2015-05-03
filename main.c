@@ -23,7 +23,6 @@
 #include "message.h"
 #include "memory.h"
 
-
 void register_signal_handlers();
 void sig_handler(int signal_number);
 void sig_alarm_handler(int i);
@@ -178,9 +177,10 @@ void register_signal_handlers() {
 }
 
 void sig_handler(int signal_number) {
+
     if (signal_number == SIGINT || signal_number == SIGTERM) {
 
-        shmdt((void*) shared_mem_ptr); // Détache la mémoire partagée
+        shmdt(shared_mem_ptr); // Détache la mémoire partagée
         shmctl(shmid, IPC_RMID, NULL); // Supprime la mémoire partagée
 
         remove_lock();

@@ -5,12 +5,15 @@
 #ifndef STREAMS_SEMAPHORE_H
 #define STREAMS_SEMAPHORE_H
 
-#define SINGLE_SEMAPHORE 1
-#define FIRST_SEMAPHORE 0
+#define NB_SEMAPHORES 2
+#define SINGLE_OPERATION 1
+
+#define SEMAPHORE_MUTEX 0
+#define SEMAPHORE_ACCESS 1
 
 void init_semaphore();
-int perform_semaphore_control(int cmd);
-int semaphore_up();
-int semaphore_down();
+int perform_semaphore_control(int semaphore, int cmd);
+int semaphore_up(int semaphore);
+int semaphore_down(int semaphore);
 
 #endif //STREAMS_SEMAPHORE_H
