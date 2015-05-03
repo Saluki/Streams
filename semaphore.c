@@ -14,7 +14,7 @@
 
 int semaphore_fd = -1;
 
-void init_semaphore()
+void init_semaphores()
 {
     key_t semaphore_key;
 
@@ -24,9 +24,9 @@ void init_semaphore()
         exit(EXIT_FAILURE);
     }
 
-    if( (semaphore_fd=semget(semaphore_key, NB_SEMAPHORES, IPC_CREAT)) == -1 )
+    if( (semaphore_fd=semget(semaphore_key, NB_SEMAPHORES, IPC_CREAT|0666)) == -1 )
     {
-        log_error("Could not initialize semaphore using semget()", LOG_CRITICAL, errno);
+        log_error("Could not create semaphore using semget()", LOG_CRITICAL, errno);
         exit(EXIT_FAILURE);
     }
 
@@ -37,33 +37,20 @@ void init_semaphore()
     }
 }
 
-int perform_semaphore_control(int semaphore, int cmd)
+void delete_semaphores()
 {
-    int control_result;
+
+}
+
+int semaphore_up(int semaphore)
+{
+    struct sembuf operations_buffer[1], semaphore_operation;
 
     if( semaphore_fd == -1 )
     {
         log_message("Semaphore set not created", LOG_WARNING);
         return -1;
     }
-
-    if( semaphore != SEMAPHORE_MUTEX && semaphore != SEMAPHORE_ACCESS )
-    {
-        log_message("Unknown semaphore", LOG_ALERT);
-        return -1;
-    }
-
-    if( (control_result=semctl(semaphore_fd, semaphore, cmd)) )
-    {
-        log_error("Could not perform operation on semaphore", LOG_CRITICAL, errno);
-    }
-
-    return control_result;
-}
-
-int semaphore_up(int semaphore)
-{
-    struct sembuf operations_buffer[1], semaphore_operation;
 
     semaphore_operation.sem_num = semaphore;
     semaphore_operation.sem_op = 1;
@@ -83,6 +70,12 @@ int semaphore_down(int semaphore)
 {
     struct sembuf operations_buffer[1], semaphore_operation;
 
+    if( semaphore_fd == -1 )
+    {
+        log_message("Semaphore set not created", LOG_WARNING);
+        return -1;
+    }
+
     semaphore_operation.sem_num = semaphore;
     semaphore_operation.sem_op = -1;
     semaphore_operation.sem_flg = 0;
@@ -90,9 +83,10 @@ int semaphore_down(int semaphore)
 
     if( semop(semaphore_fd, operations_buffer, SINGLE_OPERATION) == -1 )
     {
-        log_error("Could not perform operation up() on semaphore", LOG_ALERT, errno);
+        log_error("Could not perform operation down() on semaphore", LOG_ALERT, errno);
         return -1;
     }
 
     return 0;
 }
+

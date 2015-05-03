@@ -34,6 +34,7 @@ int shmid;
 struct memory* shared_mem_ptr;
 
 int main(int argc, char** argv) {
+
     int server_fd, port_number, max_fd, file_descriptors[MAX_NUMBER_USERS], i;
     int temp_fd, select_result, timer_is_active = FALSE, status_code;
 
@@ -55,14 +56,18 @@ int main(int argc, char** argv) {
         file_descriptors[i] = 0;
     }
 
-    // Shared memory
+    // -- SHARED MEMORY AND SEMAPHORES --
 
     shmid = create_mem();
     shared_mem_ptr = attach_mem(shmid);
+    init_semaphores();
 
-    log_message("Mémoire partagée créée et utilisable.", LOG_DEBUG);
+    log_message("Shared memory and semaphores created", LOG_DEBUG);
+
+    // -- SERVER LOOP --
 
     while (TRUE) {
+
         FD_ZERO(&file_descriptor_set);
         FD_SET(server_fd, &file_descriptor_set);
         max_fd = server_fd;
@@ -87,6 +92,7 @@ int main(int argc, char** argv) {
         }
 
         if (FD_ISSET(server_fd, &file_descriptor_set)) {
+
             if ((temp_fd = accept(server_fd, NULL, 0)) < 0) {
                 log_error("Could not accept incoming connection", LOG_ALERT, errno);
                 exit(EXIT_FAILURE);
@@ -104,6 +110,7 @@ int main(int argc, char** argv) {
         }
 
         for (i = 0; i < MAX_NUMBER_USERS; i++) {
+
             temp_fd = file_descriptors[i];
 
             if (!FD_ISSET(temp_fd, &file_descriptor_set))
@@ -125,9 +132,14 @@ int main(int argc, char** argv) {
             else    // Message sent to server
             {
                 struct message_t mess = decode(message);
-                status_code = mess.type;
+
+                if( (status_code=mess.type) == -1 )
+                {
+                    continue;
+                }
 
                 if (get_game_phase() == REGISTER_PHASE) {
+
                     if (status_code != 1) {
                         // TODO Send message back to user?
                         log_message("Currently register phase. User can only register", LOG_DEBUG);
@@ -144,14 +156,13 @@ int main(int argc, char** argv) {
                     sprintf(new_user, "User '%s' asks for registration. Adding user in memory.", (char *) mess.payload);
                     log_message(new_user, LOG_INFO);
 
-                    validation = encode(VALID_REGISTRATION, "1");
-                    send(temp_fd, validation, strlen(validation), 0);
-
                     semaphore_down(SEMAPHORE_ACCESS);
-                    strncpy(&shared_mem_ptr->player[i].name, (char*) mess.payload, strlen(mess.payload));
-                    shared_mem_ptr->player[i].fd = temp_fd;
+                    strncpy(shared_mem_ptr->players->name, (char*) mess.payload, strlen(mess.payload));
+                    shared_mem_ptr->players[i].fd = temp_fd;
                     semaphore_up(SEMAPHORE_ACCESS);
 
+                    validation = encode(VALID_REGISTRATION, "1");
+                    send(temp_fd, validation, strlen(validation), 0);
                 }
                 else    // GAME PHASE
                 {

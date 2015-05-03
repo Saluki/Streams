@@ -10,14 +10,14 @@
 #ifndef STREAMS_MEMORY_H
 #define STREAMS_MEMORY_H
 
-struct memory {
-    struct player player[MAX_NUMBER_USERS];
-};
-
 struct player {
     char name[MAX_USERNAME_LENGTH];
     int score;
     int fd;
+};
+
+struct memory {
+    struct player players[MAX_NUMBER_USERS];
 };
 
 int create_mem();

@@ -9,7 +9,10 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <stdio.h>
+#include <errno.h>
 #include <stdlib.h>
+
+#include "log.h"
 #include "memory.h"
 
 int create_mem() {
@@ -17,8 +20,8 @@ int create_mem() {
     int shmid;
     key_t key = ftok(PATH_NAME, PROJECT_ID);
 
-    if ((shmid = shmget(key, sizeof(struct memory), 0666)) < 0) {
-        perror("shmget()");
+    if( (shmid=shmget(key, sizeof(struct memory), IPC_CREAT|0666)) < 0) {
+        log_error("Error with shmget()", LOG_CRITICAL, errno);
         exit(EXIT_FAILURE);
     }
 
@@ -27,9 +30,10 @@ int create_mem() {
 
 struct memory* attach_mem(int shmid) {
 
-    struct memory* shared_mem_ptr = shmat(shmid, NULL, 0);
+    struct memory* shared_mem_ptr;
 
-    if ((int) shared_mem_ptr < 0) {
+    if( (shared_mem_ptr=shmat(shmid, NULL, 0)) == (void *)-1 )
+    {
         perror("shmat()");
         exit(EXIT_FAILURE);
     }

@@ -11,8 +11,8 @@
 #define SEMAPHORE_MUTEX 0
 #define SEMAPHORE_ACCESS 1
 
-void init_semaphore();
-int perform_semaphore_control(int semaphore, int cmd);
+void init_semaphores();
+void delete_semaphores();
 int semaphore_up(int semaphore);
 int semaphore_down(int semaphore);
 

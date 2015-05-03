@@ -84,6 +84,8 @@ struct message_t decode(char* message) {
             break;
 
         default:
+
+            type = -1;
             log_message("Incorrect message format: wrong type", LOG_NOTICE);
             break;
     }
