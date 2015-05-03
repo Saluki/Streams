@@ -29,6 +29,9 @@ void sig_alarm_handler(int i);
 void check_incorrect_usage(int argc, char** argv);
 int extract_port_number(char** argv);
 
+int shmid;
+struct memory* shared_mem_ptr;
+
 int main(int argc, char** argv) {
     int server_fd, port_number, max_fd, file_descriptors[MAX_NUMBER_USERS], i;
     int temp_fd, select_result, timer_is_active = FALSE, status_code;
@@ -53,22 +56,9 @@ int main(int argc, char** argv) {
 
     // Shared memory
 
-    int shmid;
-    key_t key = ftok(PATH_NAME, PROJECT_ID);
-    struct memory *shared_mem_ptr;
+    shmid = create_mem();
+    shared_mem_ptr = attach_mem(shmid);
 
-    if ((shmid = shmget(key, sizeof(struct memory), 0666 | IPC_CREAT)) < 0) {
-        perror("shmget()");
-        exit(EXIT_FAILURE);
-    }
-
-    shared_mem_ptr = shmat(shmid, NULL, 0);
-    if ((int) shared_mem_ptr < 0) {
-        perror("shmat()");
-        exit(EXIT_FAILURE);
-    }
-
-    // Modification des valeurs en mémoire
     log_message("Mémoire partagée créée et utilisable.", LOG_DEBUG);
 
     while (TRUE) {
@@ -157,6 +147,11 @@ int main(int argc, char** argv) {
                     validation = encode(VALID_REGISTRATION, "1");
                     send(temp_fd, validation, strlen(validation), 0);
 
+                    semaphore_down();
+                    strncpy(&shared_mem_ptr->player[i].name, (char*) mess.payload, strlen(new_user));
+                    shared_mem_ptr->player[i].fd = temp_fd;
+                    semaphore_up();
+
                 }
                 else    // GAME PHASE
                 {
@@ -166,9 +161,6 @@ int main(int argc, char** argv) {
             }
         }
     }
-
-    shmdt((void*) shared_mem_ptr); // Détache la mémoire partagée
-    shmctl(shmid, IPC_RMID, NULL); // Libère la mémoire partagée
 
     return 0;
 }
@@ -187,6 +179,10 @@ void register_signal_handlers() {
 
 void sig_handler(int signal_number) {
     if (signal_number == SIGINT || signal_number == SIGTERM) {
+
+        shmdt((void*) shared_mem_ptr); // Détache la mémoire partagée
+        shmctl(shmid, IPC_RMID, NULL); // Supprime la mémoire partagée
+
         remove_lock();
         log_message("Shutting down streams server", LOG_INFO);
         exit(EXIT_SUCCESS);

@@ -15,9 +15,11 @@ struct memory {
 };
 
 struct player {
-    int port;
     char name[MAX_USERNAME_LENGTH];
     int fd;
 };
+
+int create_mem();
+struct memory* attach_mem(int shmid);
 
 #endif //STREAMS_MEMORY_H
