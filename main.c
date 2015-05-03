@@ -49,6 +49,30 @@ int main(int argc, char** argv) {
         file_descriptors[i] = 0;
     }
 
+    // Shared memory
+
+    int shmid;
+    key_t key = ftok("./", 'd');
+    size_t shared_mem_size = MAX_ARRAY_SIZE * sizeof(char); // A redéfinir
+    void *shared_mem_ptr;
+
+    if ((shmid = shmget(key, shared_mem_size, 0666 | IPC_CREAT)) < 0) {
+        perror("shmget()");
+        exit(EXIT_FAILURE);
+    }
+
+    // void* est le type de donnée en mémoire (à remplacer par struct par exemple)
+    if (((void *) shared_mem_ptr = shmat(shmid, NULL, 0)) == (void *) -1) {
+        perror("shmat()");
+        exit(EXIT_FAILURE);
+    }
+
+    // Modification des valeurs en mémoire
+    log_message("Mémoire partagée créée et utilisable.", LOG_DEBUG);
+
+    shmdt(shared_mem_ptr); // Détache la mémoire partagée
+    shmctl(shmid, IPC_RMID, NULL); // Libère la mémoire partagée
+
     while (TRUE) {
         FD_ZERO(&file_descriptor_set);
         FD_SET(server_fd, &file_descriptor_set);
@@ -139,81 +163,57 @@ int main(int argc, char** argv) {
                 else    // GAME PHASE
                 {
                     log_message("Game phase. Not yet implemented.", LOG_INFO);
-
-                    // Shared memory
-
-                    int shmid;
-                    key_t key = ftok("./", 'd');
-                    size_t shared_mem_size = MAX_ARRAY_SIZE * sizeof(char); // A redéfinir
-                    void *shared_mem_ptr;
-
-                    if ((shmid = shmget(key, shared_mem_size, 0666 | IPC_CREAT)) < 0) {
-                        perror("shmget()");
-                        exit(EXIT_FAILURE);
-                    }
-
-                    // void* est le type de donnée en mémoire (à remplacer par struct par exemple)
-                    if (((void *) shared_mem_ptr = shmat(shmid, NULL, 0)) == (void *) -1) {
-                        perror("shmat()");
-                        exit(EXIT_FAILURE);
-                    }
-
-                    // Modification des valeurs en mémoire
-                    log_message("Mémoire partagée créée et utilisable.", LOG_DEBUG);
-
-                    shmdt(shared_mem_ptr); // Détache la mémoire partagée
-                    shmctl(shmid, IPC_RMID, NULL); // Libère la mémoire partagée
                 }
 
             }
         }
-
-        return 0;
     }
 
-    void register_signal_handlers() {
-        if (signal(SIGINT, sig_handler) == SIG_ERR || signal(SIGTERM, sig_handler) == SIG_ERR) {
-            log_error("Cannot listen to SIGINT/SIGTERM signal", LOG_CRITICAL, errno);
-            exit(EXIT_FAILURE);
-        }
+    return 0;
+}
 
-        if (signal(SIGALRM, sig_alarm_handler) == SIG_ERR) {
-            log_error("Cannot listen to SIGALRM signal", LOG_CRITICAL, errno);
-            exit(EXIT_FAILURE);
-        }
+void register_signal_handlers() {
+    if (signal(SIGINT, sig_handler) == SIG_ERR || signal(SIGTERM, sig_handler) == SIG_ERR) {
+        log_error("Cannot listen to SIGINT/SIGTERM signal", LOG_CRITICAL, errno);
+        exit(EXIT_FAILURE);
     }
 
-    void sig_handler(int signal_number) {
-        if (signal_number == SIGINT || signal_number == SIGTERM) {
-            remove_lock();
-            log_message("Shutting down streams server", LOG_INFO);
-            exit(EXIT_SUCCESS);
-        }
+    if (signal(SIGALRM, sig_alarm_handler) == SIG_ERR) {
+        log_error("Cannot listen to SIGALRM signal", LOG_CRITICAL, errno);
+        exit(EXIT_FAILURE);
+    }
+}
+
+void sig_handler(int signal_number) {
+    if (signal_number == SIGINT || signal_number == SIGTERM) {
+        remove_lock();
+        log_message("Shutting down streams server", LOG_INFO);
+        exit(EXIT_SUCCESS);
+    }
+}
+
+void sig_alarm_handler(int i) {
+    set_game_phase(GAME_PHASE);
+    log_message("Timer finished", LOG_DEBUG);
+}
+
+void check_incorrect_usage(int argc, char **argv) {
+    if (argc != 3) {
+        fprintf(stderr, "Incorrect usage\nUsage: %s [port-number] [out|file]\n", *argv);
+        exit(EXIT_FAILURE);
+    }
+}
+
+int extract_port_number(char **argv) {
+    int port_number;
+    char *end_ptr;
+
+    port_number = (int) strtol(*(argv + 1), &end_ptr, NUMERICAL_BASE);
+
+    if (*end_ptr != '\0' || port_number <= 0) {
+        fprintf(stderr, "Port number must be a positive integer\n");
+        exit(EXIT_FAILURE);
     }
 
-    void sig_alarm_handler(int i) {
-        set_game_phase(GAME_PHASE);
-        log_message("Timer finished", LOG_DEBUG);
-    }
-
-    void check_incorrect_usage(int argc, char **argv) {
-        if (argc != 3) {
-            fprintf(stderr, "Incorrect usage\nUsage: %s [port-number] [out|file]\n", *argv);
-            exit(EXIT_FAILURE);
-        }
-    }
-
-    int extract_port_number(char **argv) {
-        int port_number;
-        char *end_ptr;
-
-        port_number = (int) strtol(*(argv + 1), &end_ptr, NUMERICAL_BASE);
-
-        if (*end_ptr != '\0' || port_number <= 0) {
-            fprintf(stderr, "Port number must be a positive integer\n");
-            exit(EXIT_FAILURE);
-        }
-
-        return port_number;
-    }
+    return port_number;
 }
