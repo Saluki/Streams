@@ -2,8 +2,10 @@
  * Corentin Badot-Bertrand cbadot-14
  * Corentin Dandoy cdandoy14
  *
- * Serveur STREAMS
- * Outil permettant à l'application de logger des messages avec précision.
+ * Implémentation du serveur STREAMS.
+ * Fonctions permettant à l'application de logger des messages et des erreurs avec précision.
+ *
+ * https://github.com/Saluki/Streams-Server
  */
 #include <sys/stat.h>
 #include <time.h>

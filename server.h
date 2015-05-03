@@ -3,7 +3,9 @@
  * Corentin Dandoy cdandoy14
  *
  * Serveur STREAMS
- * Message header de serveur.c
+ * Fichier header contenant les définitions des fonctions de serveur.c.
+ *
+ * https://github.com/Saluki/Streams-Server
  */
 #ifndef STREAMS_SERVER_H
 #define STREAMS_SERVER_H

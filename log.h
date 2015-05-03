@@ -2,8 +2,11 @@
  * Corentin Badot-Bertrand cbadot-14
  * Corentin Dandoy cdandoy14
  *
- * Serveur STREAMS
- * Fichier header de log.c contenant les differents niveaux de log et certaines préferences.
+ * Implémentation du serveur STREAMS.
+ * Fichier contenant les définitions des fonctions de log.c ainsi que de constantes pour pouvoir
+ * utiliser les fonctions de log.
+ *
+ * https://github.com/Saluki/Streams-Server
  */
 #ifndef STREAMS_LOG_H
 #define STREAMS_LOG_H

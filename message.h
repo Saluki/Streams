@@ -3,13 +3,14 @@
  * Corentin Dandoy cdandoy14
  *
  * Serveur STREAMS
- * Fichier header de message.c
+ * Fichier header contenant les fonctions de message.c et de la structure pour les messages.
+ *
+ * https://github.com/Saluki/Streams-Server
  */
 #ifndef STREAMS_MESSAGE_H
 #define STREAMS_MESSAGE_H
 
 #define MESSAGE_LENGTH 25
-#define MIN_NAME_LENGTH 3
 
 enum message_type_t { ERROR_MESSAGE = -1, CANCEL_GAME, REGISTRATE, VALID_REGISTRATION, NEW_PICK, CHOOSE_PICK, END_GAME };
 

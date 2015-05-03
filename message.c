@@ -3,7 +3,9 @@
  * Corentin Dandoy cdandoy14
  *
  * Serveur STREAMS
- * Fonctions permettant d'encoder et de decoder des messages pour le client
+ * Fonctions permettant d'encoder et de decoder des messages pour le client.
+ *
+ * https://github.com/Saluki/Streams-Server
  */
 #include <string.h>
 #include <stdlib.h>

@@ -2,8 +2,11 @@
  * Corentin Badot-Bertrand cbadot-14
  * Corentin Dandoy cdandoy14
  *
- * Serveur STREAMS
- * Fonctions permettant d'implementer le blockage et deblockage du serveur
+ * Implémentation du serveur STREAMS.
+ * Ces fonctions ont pour but de pouvoir mettre un "lock" sur le serveur, c'est à dire,
+ * d'offrir un mécanisme qui n'autorise qu'une seule instance du serveur streams sur le système.
+ *
+ * https://github.com/Saluki/Streams-Server
  */
 #include <unistd.h>
 #include <stdio.h>

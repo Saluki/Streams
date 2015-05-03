@@ -2,8 +2,11 @@
  * Corentin Badot-Bertrand cbadot-14
  * Corentin Dandoy cdandoy14
  *
- * Serveur STREAMS
- * Code permettant de manipuler l'etat de la partie en cours
+ * Implémentation du serveur STREAMS.
+ * Fonctions permettant de manipuler l'état de la partie en cours.
+ * Par exemple, la phase dans laquelle le jeu se trouve.
+ *
+ * https://github.com/Saluki/Streams-Server
  */
 #include "game.h"
 

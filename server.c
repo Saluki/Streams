@@ -4,6 +4,8 @@
  *
  * Serveur STREAMS
  * Utilitaire permettant de créer le serveur et de le faire ecouter sur un port
+ *
+ * https://github.com/Saluki/Streams-Server
  */
 #include <netinet/in.h>
 #include <stdlib.h>
