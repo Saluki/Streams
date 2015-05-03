@@ -95,7 +95,7 @@ int main(int argc, char **argv) {
             continue;
         }
 
-        if (FD_ISSET(server_fd, &file_descriptor_set)) {
+        if (get_game_phase() == REGISTER_PHASE && FD_ISSET(server_fd, &file_descriptor_set)) {
 
             if ((temp_fd = accept(server_fd, NULL, 0)) < 0) {
                 log_error("Could not accept incoming connection", LOG_ALERT, errno);
