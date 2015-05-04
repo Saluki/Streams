@@ -36,7 +36,7 @@ struct message_t decode(char* message) {
 
     if( strlen(message)<2 )
     {
-        log_message("Message length is too short", LOG_DEBUG);
+        log_message("Message too short", LOG_DEBUG);
 
         struct_message.type = ERROR_MESSAGE;
         struct_message.payload = NULL;

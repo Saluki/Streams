@@ -97,7 +97,7 @@ int main(int argc, char **argv) {
             continue;
         }
 
-        if (/*get_game_phase() == REGISTER_PHASE &&*/ FD_ISSET(server_fd, &file_descriptor_set)) {
+        if (FD_ISSET(server_fd, &file_descriptor_set)) {
 
             if ((temp_fd = accept(server_fd, NULL, 0)) < 0) {
                 log_error("Could not accept incoming connection", LOG_ALERT, errno);
@@ -128,7 +128,7 @@ int main(int argc, char **argv) {
                 exit(EXIT_FAILURE);
             }
 
-            if (recv(temp_fd, message, MESSAGE_LENGTH, 0) == -1)   // Disconnected
+            if (recv(temp_fd, message, MESSAGE_LENGTH, 0) <= 0)   // Disconnected
             {
                 log_message("Client disconnected", LOG_INFO);
 
