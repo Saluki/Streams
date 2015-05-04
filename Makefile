@@ -1,5 +1,5 @@
-streams : main.o message.o lock.o server.o log.o game.o
-	gcc out/main.o out/message.o out/lock.o out/server.o out/log.o out/game.o -o out/streams
+streams : main.o message.o lock.o server.o log.o game.o  memory.o semaphore.o
+	gcc out/main.o out/message.o out/lock.o out/server.o out/log.o out/game.o out/memory.o out/semaphore.o -o out/streams
 
 main.o : main.c message.c log.c lock.c server.c game.c
 	gcc -c main.c -o out/main.o
@@ -18,3 +18,9 @@ log.o : log.c
 
 game.o : game.c
 	gcc -c game.c -o out/game.o
+
+memory.o : memory.c log.c
+	gcc -c memory.c -o out/memory.o
+
+semaphore.o : semaphore.c log.c
+	gcc -c semaphore.c -o out/semaphore.o
